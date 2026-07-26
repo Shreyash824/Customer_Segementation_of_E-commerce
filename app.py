@@ -222,7 +222,11 @@ if uploaded_file is not None:
     # Run Clustering
     # ----------------------------------
 
-    if st.button("Run K-Means"):
+    # ----------------------------------
+# Run Clustering
+# ----------------------------------
+
+if st.button("Run K-Means"):
 
     X = preprocess_data(df, features)
 
@@ -249,17 +253,17 @@ if uploaded_file is not None:
 
     c1.metric(
         "🟢 High Value",
-        len(result[result.Customer_Type == "High Value"])
+        len(result[result["Customer_Type"] == "High Value"])
     )
 
     c2.metric(
         "🟡 Medium Value",
-        len(result[result.Customer_Type == "Medium Value"])
+        len(result[result["Customer_Type"] == "Medium Value"])
     )
 
     c3.metric(
         "🔴 Low Value",
-        len(result[result.Customer_Type == "Low Value"])
+        len(result[result["Customer_Type"] == "Low Value"])
     )
 
     st.markdown("---")
@@ -267,10 +271,7 @@ if uploaded_file is not None:
     st.subheader("Cluster Centers")
     st.dataframe(centers)
 
-    # -----------------------------
     # Charts
-    # -----------------------------
-
     scatter_plot(result, features)
 
     if len(features) >= 3:
@@ -309,9 +310,7 @@ if uploaded_file is not None:
 
     st.markdown("---")
 
-    # -----------------------------
-    # Predict Customer
-    # -----------------------------
+    # Predict New Customer
 
     st.subheader("Predict New Customer")
 
@@ -340,9 +339,7 @@ if uploaded_file is not None:
         else:
             st.error("🔴 Low Value Customer")
 
-    # -----------------------------
     # Download CSV
-    # -----------------------------
 
     csv = result.to_csv(index=False).encode("utf-8")
 
@@ -353,9 +350,7 @@ if uploaded_file is not None:
         "text/csv"
     )
 
-    # -----------------------------
     # Download Excel
-    # -----------------------------
 
     buffer = io.BytesIO()
 
@@ -370,9 +365,4 @@ if uploaded_file is not None:
     )
 
 else:
-
     st.info("Upload your customer dataset to begin.")
-
-
-        
-  
