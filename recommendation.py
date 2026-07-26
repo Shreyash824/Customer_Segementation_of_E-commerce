@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 
-
 # --------------------------------------------
 # Customer Search
 # --------------------------------------------
@@ -10,8 +9,16 @@ def customer_search(df):
 
     st.header("🔍 Customer Search")
 
-   id_col = [c for c in df.columns if "customer" in c.lower()][0]
-   customer_ids = df[id_col].astype(str).tolist()
+    # Find Customer ID column automatically
+    id_columns = [c for c in df.columns if "customer" in c.lower()]
+
+    if len(id_columns) == 0:
+        st.warning("No Customer ID column found.")
+        return
+
+    id_col = id_columns[0]
+
+    customer_ids = df[id_col].astype(str).tolist()
 
     selected = st.selectbox(
         "Select Customer ID",
@@ -22,10 +29,10 @@ def customer_search(df):
 
         customer = df[df[id_col].astype(str) == selected]
 
-        st.dataframe(customer)
+        st.dataframe(customer, use_container_width=True)
 
         st.success(
-            f"Customer Segment : {customer.iloc[0]['Customer_Type']}"
+            f"Customer Segment: {customer.iloc[0]['Customer_Type']}"
         )
 
 
@@ -39,49 +46,36 @@ def business_recommendation(df):
 
     segment = st.selectbox(
         "Choose Segment",
-        ["High Value","Medium Value","Low Value"]
+        ["High Value", "Medium Value", "Low Value"]
     )
 
-    if segment=="High Value":
+    if segment == "High Value":
 
         st.success("""
 ### Recommended Strategy
 
-✔ VIP Membership
+- ⭐ VIP Membership
+- ⭐ Premium Services
+- ⭐ Loyalty Rewards
+- ⭐ Early Product Access
+- ⭐ Personalized Offers
+- ⭐ Referral Bonus
 
-✔ Premium Services
-
-✔ Loyalty Rewards
-
-✔ Early Product Access
-
-✔ Personalized Offers
-
-✔ Referral Bonus
-
-Expected Outcome:
-
-Increase Lifetime Value
+**Expected Outcome:** Increase Customer Lifetime Value
 """)
 
-    elif segment=="Medium Value":
+    elif segment == "Medium Value":
 
         st.info("""
 ### Recommended Strategy
 
-✔ Bundle Offers
+- 📦 Bundle Offers
+- 📦 Cross Selling
+- 📦 Email Campaign
+- 📦 Festival Discounts
+- 📦 Personalized Recommendations
 
-✔ Cross Selling
-
-✔ Email Campaign
-
-✔ Festival Discounts
-
-✔ Personalized Recommendations
-
-Expected Outcome:
-
-Convert Medium Customers to High Value
+**Expected Outcome:** Convert Medium Value Customers into High Value Customers
 """)
 
     else:
@@ -89,17 +83,11 @@ Convert Medium Customers to High Value
         st.warning("""
 ### Recommended Strategy
 
-✔ Coupon Campaign
+- 🎁 Coupon Campaign
+- 🎁 Cashback
+- 🎁 Welcome Offers
+- 🎁 SMS Reminder
+- 🎁 First Purchase Discount
 
-✔ Cashback
-
-✔ Welcome Offers
-
-✔ SMS Reminder
-
-✔ First Purchase Discount
-
-Expected Outcome:
-
-Increase Purchase Frequency
+**Expected Outcome:** Increase Purchase Frequency
 """)
