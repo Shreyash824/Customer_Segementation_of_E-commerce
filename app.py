@@ -38,7 +38,12 @@ st.set_page_config(
     page_icon="📊",
     layout="wide"
 )
+# -----------------------------
+# Session State
+# -----------------------------
 
+if "trained" not in st.session_state:
+    st.session_state.trained = False
 # -------------------------------------------------------
 # Sidebar
 # -------------------------------------------------------
@@ -239,14 +244,24 @@ if st.button("Run K-Means"):
 
     save_model(model)
 
-    st.success("Model trained successfully!")
+    st.session_state.result = result
+    st.session_state.centers = centers
+    st.session_state.silhouette = silhouette
+    st.session_state.model = model
+    st.session_state.trained = True
 
-    st.metric(
-        "Silhouette Score",
-        round(silhouette, 3)
-    )
+if st.session_state.trained:
 
-    st.markdown("---")
+    result = st.session_state.result
+    centers = st.session_state.centers
+    silhouette = st.session_state.silhouette
+    model = st.session_state.model
+
+    st.success("Model Trained Successfully")
+
+    st.success("Model Trained Successfully")
+
+    # EVERYTHING BELOW GOES HERE
 
     # KPI Cards
     c1, c2, c3 = st.columns(3)
