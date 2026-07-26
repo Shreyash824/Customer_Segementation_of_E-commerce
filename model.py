@@ -247,11 +247,3 @@ def dataset_statistics(df):
     }
 
     return stats
-joblib.dump(
-    {
-        "model": model,
-        "scaler": scaler,
-        "features": features
-    },
-    "customer_segmentation.pkl"
-)
