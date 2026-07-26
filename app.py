@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
+import io
 
 from model import (
     preprocess_data,
@@ -12,19 +12,23 @@ from model import (
 
 from visualization import (
     scatter_plot,
+    scatter_3d,
     pie_chart,
     bar_chart,
     histogram,
     box_plot,
     correlation_heatmap,
-    cluster_center_chart
+    cluster_center_chart,
+    radar_chart,
+    top_customers,
+    parallel_coordinates,
+    cluster_summary_table
 )
 
 from recommendation import (
     business_recommendation,
     customer_search
 )
-
 # -------------------------------------------------------
 # Page Configuration
 # -------------------------------------------------------
@@ -211,161 +215,155 @@ if uploaded_file is not None:
 
     if st.button("Run K-Means"):
 
-        X = preprocess_data(df,features)
+    X = preprocess_data(df, features)
 
-        result,centers,silhouette,model = perform_clustering(
-            df,
-            X,
-            features,
-            k
-        )
+    result, centers, silhouette, model = perform_clustering(
+        df,
+        X,
+        features,
+        k
+    )
 
-        save_model(model)
+    save_model(model)
 
-        st.success("Model Trained Successfully")
+    st.success("Model trained successfully!")
 
-        st.metric(
-            "Silhouette Score",
-            round(silhouette,3)
-        )
+    st.metric(
+        "Silhouette Score",
+        round(silhouette, 3)
+    )
 
-        # ---------------------------
-        # KPI
-        # ---------------------------
+    st.markdown("---")
 
-        high = len(result[result.Customer_Type=="High Value"])
+    # KPI Cards
+    c1, c2, c3 = st.columns(3)
 
-        medium = len(result[result.Customer_Type=="Medium Value"])
+    c1.metric(
+        "🟢 High Value",
+        len(result[result.Customer_Type == "High Value"])
+    )
 
-        low = len(result[result.Customer_Type=="Low Value"])
+    c2.metric(
+        "🟡 Medium Value",
+        len(result[result.Customer_Type == "Medium Value"])
+    )
 
-        c1,c2,c3 = st.columns(3)
+    c3.metric(
+        "🔴 Low Value",
+        len(result[result.Customer_Type == "Low Value"])
+    )
 
-        c1.metric(
-            "🟢 High Value",
-            high
-        )
+    st.markdown("---")
 
-        c2.metric(
-            "🟡 Medium Value",
-            medium
-        )
+    st.subheader("Cluster Centers")
+    st.dataframe(centers)
 
-        c3.metric(
-            "🔴 Low Value",
-            low
-        )
+    # -----------------------------
+    # Charts
+    # -----------------------------
 
-        st.markdown("---")
+    scatter_plot(result, features)
 
-        st.subheader("Cluster Centers")
-
-        st.dataframe(centers)
-
-        st.markdown("---")
-
-        scatter_plot(result,features)
-
+    if len(features) >= 3:
         scatter_3d(result, features)
 
-        pie_chart(result)
+    pie_chart(result)
 
-        bar_chart(result)
+    bar_chart(result)
 
+    if show_hist:
         histogram(result, features)
 
+    if show_box:
         box_plot(result, features)
 
+    if show_heatmap:
         correlation_heatmap(result)
 
-        cluster_center_chart(centers)
- 
-        radar_chart(centers)
+    cluster_center_chart(centers)
 
-        top_customers(result)
- 
-        parallel_coordinates(result, features)
+    radar_chart(centers)
 
-        cluster_summary_table(result, features)
+    top_customers(result)
 
-        if show_hist:
+    parallel_coordinates(result, features)
 
-            histogram(result,features)
+    cluster_summary_table(result, features)
 
-        if show_box:
+    st.markdown("---")
 
-            box_plot(result,features)
+    customer_search(result)
 
-        if show_heatmap:
+    st.markdown("---")
 
-            correlation_heatmap(result)
+    business_recommendation(result)
 
-        cluster_center_chart(centers)
+    st.markdown("---")
 
-        st.markdown("---")
+    # -----------------------------
+    # Predict Customer
+    # -----------------------------
 
-        customer_search(result)
+    st.subheader("Predict New Customer")
 
-        st.markdown("---")
+    annual = st.number_input(
+        "Annual Spending",
+        min_value=0.0,
+        key="annual"
+    )
 
-        business_recommendation(result)
+    orders = st.number_input(
+        "Order Count",
+        min_value=0,
+        key="orders"
+    )
 
-        st.markdown("---")
+    if st.button("Predict Customer"):
 
-        csv=result.to_csv(index=False).encode("utf-8")
+        spending = centers.iloc[:, 0]
 
-        st.download_button(
-            "Download Clustered Dataset",
-            csv,
-            "CustomerSegmentation.csv",
-            "text/csv"
-        )
+        if annual >= spending.max():
+            st.success("🟢 High Value Customer")
+
+        elif annual >= spending.mean():
+            st.warning("🟡 Medium Value Customer")
+
+        else:
+            st.error("🔴 Low Value Customer")
+
+    # -----------------------------
+    # Download CSV
+    # -----------------------------
+
+    csv = result.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        "⬇ Download CSV",
+        csv,
+        "CustomerSegmentation.csv",
+        "text/csv"
+    )
+
+    # -----------------------------
+    # Download Excel
+    # -----------------------------
+
+    buffer = io.BytesIO()
+
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        result.to_excel(writer, index=False)
+
+    st.download_button(
+        "⬇ Download Excel",
+        buffer.getvalue(),
+        "CustomerSegmentation.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 else:
 
     st.info("Upload your customer dataset to begin.")
 
-    st.header("Predict New Customer")
 
-annual = st.number_input(
-    "Annual Spending",
-    min_value=0.0
-)
-
-orders = st.number_input(
-    "Order Count",
-    min_value=0
-)
-
-if st.button("Predict Segment"):
-
-    if annual < centers.iloc[:,0].mean():
-
-        st.error("Predicted Segment : Low Value")
-
-    elif annual < centers.iloc[:,0].max():
-
-        st.warning("Predicted Segment : Medium Value")
-
-    else:
-
-        st.success("Predicted Segment : High Value")
         
-       import io
-
-       buffer = io.BytesIO()
-
-       with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-
-       result.to_excel(writer,index=False)
-
-       st.download_button(
-
-       "Download Excel",
-
-       buffer.getvalue(),
-
-      "CustomerSegmentation.xlsx",
-
-      "application/vnd.ms-excel"
-)
+  
