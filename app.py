@@ -353,19 +353,19 @@ if st.button("Predict Segment"):
         
        import io
 
-buffer = io.BytesIO()
+       buffer = io.BytesIO()
 
-with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+       with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
 
-    result.to_excel(writer,index=False)
+       result.to_excel(writer,index=False)
 
-st.download_button(
+       st.download_button(
 
-    "Download Excel",
+       "Download Excel",
 
-    buffer.getvalue(),
+       buffer.getvalue(),
 
-    "CustomerSegmentation.xlsx",
+      "CustomerSegmentation.xlsx",
 
-    "application/vnd.ms-excel"
+      "application/vnd.ms-excel"
 )
