@@ -26,8 +26,8 @@ from visualization import (
 )
 
 from recommendation import (
-    business_recommendation,
-    customer_search
+   customer_search,
+   business_recommendation
 )
 # -------------------------------------------------------
 # Page Configuration
