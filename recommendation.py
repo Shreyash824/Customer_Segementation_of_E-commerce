@@ -10,7 +10,8 @@ def customer_search(df):
 
     st.header("🔍 Customer Search")
 
-    customer_ids = df["Customer_ID"].astype(str).tolist()
+   id_col = [c for c in df.columns if "customer" in c.lower()][0]
+   customer_ids = df[id_col].astype(str).tolist()
 
     selected = st.selectbox(
         "Select Customer ID",
@@ -19,7 +20,7 @@ def customer_search(df):
 
     if selected:
 
-        customer = df[df["Customer_ID"].astype(str)==selected]
+        customer = df[df[id_col].astype(str) == selected]
 
         st.dataframe(customer)
 
