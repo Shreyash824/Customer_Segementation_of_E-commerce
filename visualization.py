@@ -298,7 +298,7 @@ def parallel_coordinates(df, features):
 
         dimensions=features,
 
-        color=df["Cluster"]
+        color="Cluster"
 
     )
 
