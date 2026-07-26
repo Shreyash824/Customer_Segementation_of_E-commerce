@@ -17,7 +17,7 @@ def scatter_plot(df, features):
         x=features[0],
         y=features[1],
         color="Customer_Type",
-        hover_data=["Customer_ID"],
+        hover_data=df.columns.tolist(),
         size=features[1],
         template="plotly_white"
     )
