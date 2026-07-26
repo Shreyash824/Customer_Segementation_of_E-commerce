@@ -161,6 +161,15 @@ if uploaded_file is not None:
 
         st.stop()
 
+    required = ["Annual_Spending", "Order_Count"]
+
+    missing = [c for c in required if c not in df.columns]
+
+    if missing:
+       st.error(f"Missing required columns: {missing}")
+       st.stop()
+
+
     # ----------------------------------
     # Find Best K
     # ----------------------------------
